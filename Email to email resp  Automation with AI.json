@@ -1,0 +1,349 @@
+{
+  "name": "Email to email resp  Automation with AI",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "=define",
+        "text": "=\nEmail Subject: {{ JSON.parse('{\"subject\":\"' + $node[\"Gmail Trigger\"].json[\"Subject\"] + '\"}').subject }}\n\n\nFrom: {{ JSON.parse('{\"from\":\"' + $node[\"Gmail Trigger\"].json[\"From\"] + '\"}').from }}\n\nMessage: {{ $json.snippet }}\n\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are an intelligent email assistant.\n\nYour task is to analyze incoming emails and automatically generate professional replies.\n\nFor every email:\n\n1. Classify the email into one category:\n   - sales, support, billing, general\n\n2. Determine priority:\n   - low, medium, high, urgent\n\n3. Detect sentiment:\n   - positive, neutral, negative\n\n4. Write a professional reply:\n   - polite and clear\n   - directly addresses the sender’s message\n   - concise and helpful\n\nAlways return output strictly in this JSON format:\n\n{\n  \"category\": \"\",\n  \"priority\": \"\",\n  \"sentiment\": \"\",\n  \"reply\": \"\"\n}\n\nRules:\n- Do NOT add any extra text outside the JSON\n- Do NOT explain anything\n- Always return valid JSON only\n- Never leave fields empty\n"
+        }
+      },
+      "id": "f17a4bfa-09b0-4235-b93a-8a41919e77f9",
+      "name": "Analyze Email & Generate Reply",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        592,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        },
+        "responsesApiEnabled": "={{ true }}",
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "a4ac95f6-8d7a-4bed-824f-20bc0903bf57",
+      "name": "OpenAI GPT Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        544
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"category\": \"support\",\n  \"priority\": \"medium\",\n  \"sentiment\": \"neutral\",\n  \"reply\": \"Thank you for your inquiry...\"\n}"
+      },
+      "id": "28dd2f8a-fa51-4471-8635-ef8ebe58aa17",
+      "name": "Email Analysis Schema",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        880,
+        592
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.from }}",
+        "subject": "=Re: {{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.reply }}",
+        "options": {
+          "replyTo": ""
+        }
+      },
+      "id": "2bb14358-5eac-4de9-977f-4e75a6275796",
+      "name": "Send Reply Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1088,
+        288
+      ],
+      "webhookId": "f96cee7f-9df1-4a13-8282-2977e13ba132",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "stRTBqlEzd2739Qy",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "10_i28RWmhW4C83Rx7FSzp24v1mkVPao84fswWZTm-LM",
+          "mode": "list",
+          "cachedResultName": "Email resp",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10_i28RWmhW4C83Rx7FSzp24v1mkVPao84fswWZTm-LM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10_i28RWmhW4C83Rx7FSzp24v1mkVPao84fswWZTm-LM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $node[\"Edit Fields\"].json.from }}\n",
+            "Subject": "={{ $node[\"Edit Fields\"].json.subject }}",
+            "Reply": "={{ $node[\"Edit Fields\"].json.reply }}",
+            "Date": "={{ new Date().toISOString() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Subject",
+              "displayName": "Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Reply",
+              "displayName": "Reply",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "807c4def-a393-4856-8bf6-d45ef77c7131",
+      "name": "Log Email Details",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1280,
+        400
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "aei6y4xZEpM8361U",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "=everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "q": "in:inbox newer_than:1d",
+          "readStatus": "both"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        368,
+        240
+      ],
+      "id": "f83265a1-eac6-4b32-9714-da6c16c4737f",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "eEYlzC4ZSm8a75fT",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5356d911-611a-431a-b2e7-f0d21ad7da9a",
+              "name": "reply",
+              "value": "={{ $json.output.reply }}\n",
+              "type": "string"
+            },
+            {
+              "id": "55c3b4bd-3425-4f7c-9571-b210ca28e473",
+              "name": "from",
+              "value": "={{ JSON.parse('{\"from\":\"' + $node[\"Gmail Trigger\"].json[\"From\"] + '\"}').from }}",
+              "type": "string"
+            },
+            {
+              "id": "2cc04c41-50b6-490d-8095-7c1de31c26c3",
+              "name": "subject",
+              "value": "={{ JSON.parse('{\"subject\":\"' + $node[\"Gmail Trigger\"].json[\"Subject\"] + '\"}').subject }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        928,
+        192
+      ],
+      "id": "5737a6f5-f1d6-4e45-a041-0339561be19c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-safeguard-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        560,
+        576
+      ],
+      "id": "4b8b29d6-572b-41e4-a36c-4322cee72cdc",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "RJSlnTzwow4OrW6i",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Analyze Email & Generate Reply": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI GPT Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Email Analysis Schema": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Analyze Email & Generate Reply",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Reply Email": {
+      "main": [
+        [
+          {
+            "node": "Log Email Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Analyze Email & Generate Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send Reply Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analyze Email & Generate Reply",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6612911b-b6e4-4b3d-9330-bc81c631b2d7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "94c79b07a33e5626da20ad34da8db219e16f5cf0d76dbd9cfa01a332fcc8523f"
+  },
+  "id": "mKOPC38BqSQaHZZi",
+  "tags": []
+}
