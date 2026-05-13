@@ -22,7 +22,7 @@ Email → AI Analysis → Generate Reply
 
 > Below is the full n8n automation workflow:
 
-![Workflow](email to email resp.png)
+![Workflow](workflow.png)
 
 ## Tech Stack
 
